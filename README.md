@@ -33,7 +33,7 @@
 <br />
 <span id="footnote1"><sup>[2](#2)</sup> Vid detta tillfälle är Vue-applikationen klar att serveras.</span>
 
-## Statisk kodanalys _(lint)_
+## Statisk kodanalys rekommenderas men är inget krav _(lint)_
 
 Statisk kodanalys utförs för att hitta potentiella fel, misstänkta konstruktioner eller andra problem relaterade till bristande kodkvalitet. Följande steg är nödvändiga för att utföra statisk kodanalys och därmed bli godkänd på uppgiften. Observera att **alla rapporterade problem ska åtgärdas** före presentationen. Vidare måste den senaste versionen av [Node.js LTS](https://nodejs.org/) installeras innan instruktionerna nedan kan utföras.
 
