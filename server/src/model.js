@@ -24,8 +24,8 @@ class Model {
    * @param {String} username - The username of the admin
    * @returns {void}
    */
-  createUser(id, username) {
-    this.users[id] = new Assistant(username);
+  createAssistant(id, username) {
+    this.assistants[id] = new Assistant(username);
   }
 
   /**
@@ -33,8 +33,8 @@ class Model {
    * @param {String} id - An unique identifier for the user session.
    * @returns {User}
    */
-  findUserById(id) {
-    return this.users[id];
+  findAssistantById(id) {
+    return this.assistant[id];
   }
 
 
