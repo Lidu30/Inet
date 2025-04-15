@@ -21,16 +21,13 @@ export default {
   name: "RoomsView",
   components: {},
   data: () => ({
-    rooms: [],
+    rooms: [
+      { name: "c++" },
+      { name: "java" },
+      { name: "js" },
+      { name: "python" },
+    ],
   }),
-  mounted() {
-    fetch("/api/rooms")
-      .then((res) => res.json())
-      .then(({ rooms }) => {
-        this.rooms = rooms;
-      })
-      .catch(console.error);
-  },
   methods: {
     redirect(name) {
       this.$router.push(`/rooms/${name}`);

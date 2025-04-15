@@ -14,7 +14,9 @@
           <a class="nav-link" href="#" @click="redirect('/login')">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click="redirect('/rooms')">Rooms</a>
+          <a class="nav-link" href="#" @click="redirect('/showTimeslots')"
+            >Available times</a
+          >
         </li>
       </ul>
     </div>
@@ -27,25 +29,17 @@
 <script>
 // @ is an alias to /src
 import "bootstrap";
-import io from "socket.io-client";
 
 export default {
   name: "App",
   components: {},
-  data: () => ({
-    socket: io(/* socket.io options */).connect(),
-  }),
-  created() {
-    const { commit } = this.$store;
+  data: () => ({}),
+  mounted() {
+    const { commit, getters } = this.$store;
     const { push } = this.$router;
 
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then(({ authenticated }) => {
-        commit("setAuthenticated", authenticated);
-        push(authenticated === true ? "/rooms" : "/login");
-      })
-      .catch(console.error);
+    commit("setAuthenticated", false);
+    push(getters.isAuthenticated === true ? "/rooms" : "/login");
   },
   methods: {
     redirect(target) {

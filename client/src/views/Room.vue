@@ -33,29 +33,13 @@ export default {
   components: {},
   data() {
     return {
-      name: this.$route.params.name,
       messages: [],
       message: "",
     };
   },
-  async mounted() {
-    const res = await fetch(`/api/rooms/${this.name}/messages`);
-    const { messages } = await res.json();
-    this.messages = messages;
-
-    const { socket } = this.$root;
-    socket.on("msg", (msg) => {
-      this.messages = [...this.messages, msg];
-    });
-  },
   methods: {
     send() {
-      fetch(`/api/rooms/${this.name}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: this.message }),
-      }).catch(console.error);
-
+      this.messages = [...this.messages, this.message];
       this.message = "";
     },
   },
