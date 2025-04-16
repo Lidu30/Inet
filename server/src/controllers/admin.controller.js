@@ -1,7 +1,5 @@
 import { Router } from 'express'
 import db from '../db.js'
-import sessionManager from '../sessionManager.js'
-import { readFile, resolvePath } from '../util.js'
 import model from "../model.js";
 
 const publicRouter = Router()
@@ -16,93 +14,56 @@ const privateRouter = Router()
  * @returns {void}
  */
 
-const requireAuth = (req, res, next) => {
+const  requireAuth = (req, res, next) => {
     const { id } = req.session;
-    const { user } = model.findUserById(id);
-    if (user === undefined){
-        rest.status(401).end();
-        return;
+    const assistant = model.findAssistantById(id);
+    if( assistant === undefined){
+        res.status(401).json({error: "Not authenticated"});
+    } else {
+        next();
     }
-    next();
 }
 
-router.get();
-
-
-
-
-
-
-
-// Defines a route for the GET /login request
-publicRouter.get('/login', async (req, res) => {
-  console.log(req.body)
-  // FIXME
-  const htmlDoc = await readFile(resolvePath('public', 'login.html'))
-  res.status(200).send(htmlDoc)
-})
 
 // Defines a route for handling the login form submission
 publicRouter.post('/login', async (req, res) => {
-  const sendErrorResponse = async (errorMessage) => {
-    const htmlDoc = await readFile(resolvePath('public', 'login.html'))
-    const modifiedHtml = htmlDoc
-      .replace(
-        'class="alert alert-danger d-none"',
-        'class="alert alert-danger"'
-      )
-      .replace('></div>', `>${errorMessage}</div>`)
-    // .replace('placeholder="Username"', `placeholder="Username" value="${username}"`)
-    res.status(200).send(modifiedHtml)
+  const { username } = req.body;
+  const { password } = req.body;
+  
+  const validPassword =
+        /[a-zA-Z]/.test(password) && /\d/.test(password);
+      const validUsername =
+        /[a-zA-Z]/.test(username) && /\d/.test(username);
+
+  if(!validUsername){
+    return res.status(400).json({
+        error: "Username must be at least 3 characters and contain at least one letter or number "})
+  }
+  if(!validPassword){
+    return res.status(400).json({
+        error: "Password must be at least 3 characters and contain at least one letter or number "})
   }
 
-  console.log(req.body)
-
-  // FIXME
-  const { username, password } = req.body
-
-  /*
-  db.each('SELECT * FROM users', (err, row) => {
-    if (err) {
-      throw new Error(err)
-    }
-    console.log(`${row.id}: ${row.info}`)
-  })
-  */
-
-  // FIXME
   try {
     const user = await db.get('SELECT * FROM users WHERE username = ?', [
       username,
     ])
 
     if (user === undefined || password !== user.password) {
-      return await sendErrorResponse('Invalid username or password')
+      return res.status(401).json({ error: 'Invalid username or password' }); 
     }
+    const sessionId = req.session.id;
+    model.createAssistant(username, sessionId);
+    req.session.save((err) =>{
+        if (err) console.error(err);
+        else console.debug(`Saved user: ${JSON.stringify(model.findAssistantBy(id))}`);
+    });
 
-    const session = sessionManager.createNewSession(user)
-    console.log('Created session:', session)
-    
-    // Sets a cookie in the browser with the session ID
-    res.cookie('session-id', session.id).redirect('/profile')
+    res.status(200).json({authenticated: true}); 
   } catch (error) {
     console.error('Login error:', error)
-    return await sendErrorResponse('Internal server error')
+    return res.status(500).json({ error: 'Internal server error' });
   }
-})
-
-privateRouter.post('/logout', (req, res) => {
-  console.log(req.body)
-
-  // FIXME
-  const sessionId = req.cookies['session-id']
-
-  if (sessionId) {
-    sessionManager.deleteSession(sessionId)
-  }
-
-  // res.redirect('/login?error=FIXME')
-  res.clearCookie('session-id').redirect('/login')
 })
 
 export default {

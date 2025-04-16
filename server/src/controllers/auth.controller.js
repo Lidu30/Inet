@@ -10,7 +10,7 @@ const router = Router();
  * @param {Function} next
  * @returns {void}
  */
-const requireAuth = (req, res, next) => {
+const requireAut = (req, res, next) => {
   // Use an unique session identifier to access information about the user making the request
   const { id } = req.session;
   const user = model.findUserById(id);

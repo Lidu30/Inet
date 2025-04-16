@@ -3,7 +3,7 @@ import TimeSlot from "./models/timeslot.model.js";
 
 class Model {
   constructor() {
-    this.assistants = {};
+    this.assistant = {};
     this.timeslots = {};
 
     this.io = undefined;
@@ -24,8 +24,10 @@ class Model {
    * @param {String} username - The username of the admin
    * @returns {void}
    */
-  createAssistant(id, username) {
-    this.assistants[id] = new Assistant(username);
+  createAssistant(username, id) {
+    this.assistant
+    
+    [id] = new Assistant(username, id);
   }
 
   /**
@@ -34,7 +36,8 @@ class Model {
    * @returns {User}
    */
   findAssistantById(id) {
-    return this.assistant[id];
+    const assistant = this.assistant[id]
+    return assistant ? assistant.username : undefined;
   }
 
 

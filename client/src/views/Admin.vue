@@ -43,7 +43,7 @@ export default {
   }),
 
   created() {
-    if (!this.$store.state.loggedIn) {
+    if (!this.$store.state.authenticated) {
       this.$router.push("/login");
       return;
     }
