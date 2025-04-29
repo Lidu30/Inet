@@ -12,16 +12,6 @@ const db = await open({
   driver: sqlite3.Database,
 });
 
-/*
-await db.run("DROP TABLE IF EXISTS lorem");
-await db.run("CREATE TABLE lorem (info TEXT)");
-
-const statement = await db.prepare("INSERT INTO lorem VALUES (?)");
-for (let i = 0; i < 10; i += 1) {
-  statement.run(`ipsum ${i}`);
-}
-statement.finalize();
-*/
 
 // Create table 'users' if it doesn't already exist
 await db.run(`
@@ -34,11 +24,17 @@ await db.run(`
 
 const username = "test1";
 const password = "test1";
+const username1 = "test1";
+const password1 = "test1";
 
 try {
   await db.run("INSERT INTO users VALUES (?, ?)", [
     username,
     password,
+  ]);
+  await db.run("INSERT INTO users VALUES (?, ?)", [
+    username1,
+    password1,
   ]);
   console.log("Dummy user added successfully!");
 } catch (error) {
@@ -51,7 +47,7 @@ await db.run(`
     timeslot_id INTEGER PRIMARY KEY,
     assistant_id TEXT NOT NULL,
     time TEXT NOT NULL,
-    booked INTEGER NOT NULL,
+    booked INTEGER NOT NULL DEFAULT ,
     booked_by TEXT
   )
 `);

@@ -2,29 +2,33 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
-    loggedIn: false,
     authenticated: false,
     username: "",
-    timeSlots: ["15:00", "15:15", "15:30", "15:45"],
+    timeSlots: [],
     selectedTime: "",
+    selectedTimeId: null,
     admin: "",
+    reservedSlots: new Set(),
   },
   getters: {
     isAuthenticated(state) {
       return state.authenticated;
     },
-    isLoggedIn(state) {
-      return state.loggedIn;
+
+    availableTimeSlots(state) {
+      return state.timeSlots.filter(slot => !slot.booked && !state.reservedSlots.has(slot.timeslot_id));
     },
+
+    bookedTimeSlots(state) {
+      return state.timeSlots.filter(slot => slot.booked);
+    },
+
   },
   mutations: {
     setAuthenticated(state, authenticated) {
       state.authenticated = authenticated;
     },
-    setLoggedIn(state, status) {
-      state.loggedIn = status;
-    },
-
+  
     setUsername(state, username) {
       state.username = username;
     },
@@ -33,36 +37,137 @@ export default createStore({
       state.timeSlots = timeSlots;
     },
 
-    setSelectedTime(state, selectedTime) {
-      state.selectedTime = selectedTime;
+    setSelectedTime(state, { time, id, admin }) {
+      state.selectedTime = time;
+      state.selectedTimeId = id;
+      state.admin = admin;
     },
-
     setAdmin(state, admin) {
       state.admin = admin;
     },
+    addTimeslot(state, timeslot) {
+      state.timeSlots.push(timeslot);
+    },
+
+    removeTimeslot(state, timeslotId) {
+      state.timeSlots = state.timeSlots.filter(slot => slot.timeslot_id !== timeslotId);
+    },
+
+    updateTimeslot(state, updatedTimeslot) {
+      const index = state.timeSlots.findIndex(slot => slot.timeslot_id === updatedTimeslot.timeslot_id);
+      if (index !== -1) {
+        state.timeSlots.splice(index, 1, updatedTimeslot);
+      }
+    },
+
+    reserveTimeslot(state, timeslotId) {
+      state.reservedSlots.add(timeslotId);
+    },
+
   },
 
   actions: {
-    login({ commit }, { username, password }) {
-      if (password === "valid1") {
-        commit("setLoggedIn", true);
-        commit("setUsername", username);
-        commit("setAuthenticated", true);
-        return true;
+    async authenticate({ commit }, { username, password }) {
+      
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        commit('setLoggedIn', true);
+        commit('setUsername', username);
+        commit('setAuthenticated', true);
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
       }
-      return false;
+      
     },
+   
 
-    adminTimes({ commit }, { timeSlots }) {
-      commit("setTimeSlots", timeSlots);
+    async reserveTimeslot({ commit }, timeslotId) {
+      const response = await fetch(`/api/timeslots/${timeslotId}/reserve`, {
+        method: 'POST', })
+      
+      if (response.ok) {
+        commit('reserveTimeslot', timeslotId);
+        return { success: true };
+      } 
+      const error = response.json();
+      return { success: false, error: error.error };
+    },
+    
+
+    async bookTimeslot({ commit }, { timeslotId, studentName }) {
+      
+      const response = await fetch(`/api/timeslots/${timeslotId}/book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ studentName }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        commit('updateTimeslot', data.timeslot);
+        commit('unreserveTimeslot', timeslotId);
+        return { success: true };
+      } 
+      const error = await response.json();
+      return { success: false, error: error.error };
+    },
+    
+
+    async cancelReservation({ commit }, timeslotId) {
+      const response = await fetch(`/api/timeslots/${timeslotId}/cancel`, {
+        method: 'POST',
+      });
+    
+      if (response.ok) {
+        commit('unreserveTimeslot', timeslotId);
+        return { success: true };
+      } 
+      const error = await response.json();
+      return { success: false, error: error.error };
     },
 
     selectedTime({ commit }, { selectedTime }) {
       commit("setSelectedTime", selectedTime);
     },
 
-    admin({ commit }, { adminName }) {
-      commit("setAdmin", adminName);
+    async addTimeslot({ commit }, time) {
+
+    
+
+    // Handle socket events
+    handleSocketEvent({ commit }, { event, data }) {
+      switch (event) {
+        case 'new_timeslot':
+          commit('addTimeslot', data);
+          break;
+        case 'delete_timeslot':
+          commit('removeTimeslot', data.id);
+          break;
+        case 'reserve_timeslot':
+          commit('reserveTimeslot', data.id);
+          break;
+        case 'unreserve_timeslot':
+          commit('unreserveTimeslot', data.id);
+          break;
+        case 'book_timeslot':
+          commit('updateTimeslot', data);
+          commit('unreserveTimeslot', data.timeslot_id);
+          break;
+        default:
+          console.warn('Unknown socket event:', event);
+      }
     },
   },
   modules: {},

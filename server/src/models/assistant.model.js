@@ -1,24 +1,40 @@
 class Assistant { 
-    constructor(username, id){
-      this.id = id;
-      this.username= username;
-    }
-
-  get username(){
-    return this._username
+  constructor(username, id) {
+    this._username = username;
+    this._id = id;
   }
 
-  get id(){
+  /**
+   * Get the username of this assistant
+   * @returns {String} The username
+   */
+  get username() {
+    return this._username;
+  }
+
+  /**
+   * Get the ID of this assistant
+   * @returns {String} The ID
+   */
+  get id() {
     return this._id;
   }
 
-  set username(username){
+  /**
+   * Set the username of this assistant
+   * @param {String} username - The new username
+   */
+  set username(username) {
     this._username = username;
   }
 
-  set id (id){
-    return this._id = id;
+  /**
+   * Set the ID of this assistant
+   * @param {String} id - The new ID
+   */
+  set id(id) {
+    this._id = id;
   }
-    //här kommer du deklarera eventuella getters, setters eller andra "nödvändiga" metoder
- }
- export default Assistant;
+}
+
+export default Assistant;

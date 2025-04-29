@@ -1,72 +1,107 @@
-import { Router } from 'express'
-import db from '../db.js'
+import { Router } from 'express';
+import db from '../db.js';
 import model from "../model.js";
 
-const publicRouter = Router()
-const privateRouter = Router()
-
+const publicRouter = Router();
+const privateRouter = Router();
 
 /**
- * requireAuth is a middleware function that limit access to an endpoint to authenticated users.
+ * requireAuth is a middleware function that limits access to an endpoint to authenticated users.
  * @param {Request} req
  * @param {Response} res
  * @param {Function} next
  * @returns {void}
  */
-
-const  requireAuth = (req, res, next) => {
+const requireAuth = (req, res, next) => {
     const { id } = req.session;
     const assistant = model.findAssistantById(id);
-    if( assistant === undefined){
-        res.status(401).json({error: "Not authenticated"});
+    if (assistant === undefined) {
+        res.status(401).json({ error: "Not authenticated" });
     } else {
         next();
     }
-}
-
+};
 
 // Defines a route for handling the login form submission
 publicRouter.post('/login', async (req, res) => {
-  const { username } = req.body;
-  const { password } = req.body;
+  const { username, password } = req.body;
   
-  const validPassword =
+  // Validate input
+  const validPassword = 
+        password && password.length >= 3 && 
         /[a-zA-Z]/.test(password) && /\d/.test(password);
-      const validUsername =
+  const validUsername = 
+        username && username.length >= 3 && 
         /[a-zA-Z]/.test(username) && /\d/.test(username);
 
-  if(!validUsername){
+  if (!validUsername) {
     return res.status(400).json({
-        error: "Username must be at least 3 characters and contain at least one letter or number "})
+        error: "Username must be at least 3 characters and contain at least one letter and one number"
+    });
   }
-  if(!validPassword){
+  
+  if (!validPassword) {
     return res.status(400).json({
-        error: "Password must be at least 3 characters and contain at least one letter or number "})
+        error: "Password must be at least 3 characters and contain at least one letter and one number"
+    });
   }
 
   try {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [
-      username,
-    ])
+    const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
 
     if (user === undefined || password !== user.password) {
       return res.status(401).json({ error: 'Invalid username or password' }); 
     }
-    const sessionId = req.session.id;
-    model.createAssistant(username, sessionId);
-    req.session.save((err) =>{
-        if (err) console.error(err);
-        else console.debug(`Saved user: ${JSON.stringify(model.findAssistantBy(id))}`);
+    
+    // Create assistant in the model and associate with session
+    model.createAssistant(username, req.session.id);
+    
+    req.session.save((err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to save session' });
+        } 
+        console.debug(`Saved assistant session: ${username}`);
+        return res.status(200).json({ authenticated: true, username }); 
     });
-
-    res.status(200).json({authenticated: true}); 
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Login error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
-})
+});
+
+// Logout route
+publicRouter.post('/logout', (req, res) => {
+  const { id } = req.session;
+  
+  // Check if user is authenticated
+  if (!model.findAssistantById(id)) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  
+  // Destroy the session
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.status(500).json({ error: 'Failed to logout' });
+    }
+    return res.status(200).json({ success: true });
+  });
+});
+
+// Check authentication status
+publicRouter.get('/auth/status', (req, res) => {
+  const { id } = req.session;
+  const username = model.findAssistantById(id);
+  
+  res.status(200).json({ 
+    authenticated: username !== undefined,
+    username: username || null
+  });
+});
 
 export default {
   publicRouter,
   privateRouter,
-}
+  requireAuth
+};
