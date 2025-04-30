@@ -10,8 +10,8 @@ import admin from "./controllers/admin.controller.js";
 import timeslot from "./controllers/timeslot.controller.js";
 import db from "./db.js";
 
-//import admin from "./controllers/admin.controller.js";
-//import timeslot from "./controllers/timeslot.controller.js";
+// import admin from "./controllers/admin.controller.js";
+// import timeslot from "./controllers/timeslot.controller.js";
 
 const port = 8989;
 const app = express();
@@ -59,16 +59,18 @@ app.use(express.static(resolvePath("client", "dist")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//app.use("/api", auth.requireAuth, admin.router);
-//app.use("/api", timeslot.router);
+// app.use("/api", auth.requireAuth, admin.router);
+// app.use("/api", timeslot.router);
 app.use("/api", admin.publicRouter);
 app.use("/api", timeslot.publicRouter);
 
-
-// Authentication check for private routes
-const requireAuth = admin.requireAuth;
+const { requireAuth } = admin;
 app.use("/api", requireAuth, admin.privateRouter);
 app.use("/api", requireAuth, timeslot.privateRouter);
+
+app.get('*', (req, res) => {
+  res.sendFile(resolvePath('client', 'dist', 'index.html'));
+});
 
 // Initialize a model
 model.init(io);

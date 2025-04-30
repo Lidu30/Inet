@@ -39,36 +39,58 @@ export default {
     msg: "",
   }),
 
-  methods: {
-    authenticate() {
-      const { commit, getters } = this.$store;
-      const { push } = this.$router;
+  created() {
+    // Check if already authenticated
+    this.checkAuthStatus();
+  },
 
-      commit("setAuthenticated", true);
-      push(getters.isAuthenticated === true ? "/rooms" : "/login");
+  methods: {
+    checkAuthStatus() {
+      fetch("/api/auth/status")
+        .then(res => res.json())
+        .then(({ authenticated, username }) => {
+          if (authenticated) {
+            this.$store.commit('setLoggedIn', true);
+            this.$store.commit('setUsername', username);
+            this.$store.commit('setAuthenticated', true);
+            this.$router.push('/admin');
+          }
+        })
+        .catch(error => {
+          console.error('Error checking auth status:', error);
+        });
     },
 
     checkLogin() {
-      const tempPassword = "valid1";
-      const validPassword =
-        /[a-zA-Z]/.test(this.password) && /\d/.test(this.password);
-      const validUsername =
-        /[a-zA-Z]/.test(this.username) && /\d/.test(this.username);
-
-      if (validUsername && this.password === tempPassword && validPassword) {
-        this.$store.dispatch("login", {
-          username: this.username,
-          password: this.password,
+      if (this.username.length >= 3 && this.password.length >= 3) {
+        fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            username: this.username, 
+            password: this.password 
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.authenticated) {
+            this.$store.commit('setLoggedIn', true);
+            this.$store.commit('setUsername', this.username);
+            this.$router.push('/admin');
+          } else {
+            this.msg = "Wrong username or password!";
+          }
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          this.msg = "Login failed. Please try again.";
         });
-        this.$router.push("/admin");
-        this.msg = "";
-
-        //  this.$store.commit('setLoggedIn', true);
-        //  this.$store.commit('setUsername' , this.username);
       } else {
-        this.msg = "Wrong username or password!";
+        this.msg = "Username and password must be at least 3 characters";
       }
-    },
-  },
+    }
+  }
 };
 </script>

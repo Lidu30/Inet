@@ -1,64 +1,33 @@
 <template>
-  <div class="admin-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="admin-name">Signed in as {{ username }}</h1>
-      <button type="button" class="btn btn-danger" @click="logout">Logout</button>
-    </div>
+  <h1 class="admin-name">Signed in as {{ username }}</h1>
 
-    <div class="timeslot-form">
-      <div class="input-container">
-        <label for="newTimeslot" class="form-label">Add new timeslot:</label>
-        <input id="newTimeslot" v-model="newTimeslot" type="time" class="time-input form-control" />
-      </div>
-      <button type="button" class="btn btn-primary ms-2" @click="addTimeslot">Add</button>
+  <div class="timeslot-form">
+    <div class="input-container">
+      <label for="newTimeslot" class="form-label"></label>
+      <input v-model="newTimeslot" type="time" class="time-input" />
     </div>
-    
-    <p v-if="msg" :class="msgType === 'error' ? 'alert alert-danger' : 'alert alert-success'">{{ msg }}</p>
-    
-    <div v-if="loading" class="my-3 text-center">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
+  </div>
+  <p v-if="msg" class="text-danger">{{ msg }}</p>
+  <button type="button" @click="addTimeslot">Add</button>
 
-    <div v-else class="timeslots-list mt-4">
-      <h3>Your timeslots</h3>
-      
-      <div v-if="timeSlots.length === 0" class="alert alert-info">
-        You haven't created any timeslots yet.
-      </div>
-      
-      <div v-else>
-        <div 
-          v-for="timeslot in timeSlots" 
-          :key="timeslot.id" 
-          class="timeslot-item d-flex align-items-center mb-2 p-2 border rounded"
-        >
-          <input 
-            v-model="selectedTimeslots" 
-            type="checkbox" 
-            :value="timeslot.id" 
-            class="form-check-input me-2" 
-          />
-          <span>
-            <strong>Time:</strong> {{ timeslot.time }} 
-            <span v-if="timeslot.booked" class="badge bg-success ms-2">
-              Booked by: {{ timeslot.bookedBy }}
-            </span>
-            <span v-else class="badge bg-secondary ms-2">Available</span>
-          </span>
-        </div>
-        
-        <button
-          v-if="selectedTimeslots.length > 0"
-          type="button"
-          class="btn btn-danger mt-3"
-          @click="removeTimeslots"
-        >
-          Remove Selected
-        </button>
-      </div>
+  <div class="timeslots-list">
+    <div
+      v-for="(timeslot, index) in timeSlots"
+      :key="index"
+      class="timeslot-item"
+    >
+      <label for="newTimeslot" class="form-label"></label>
+      <input v-model="selectedTimeslots" type="checkbox" :value="timeslot.id" />
+      <span>Assistant: {{ username }} Time: {{ timeslot.time }}</span>
     </div>
+    <button
+      v-if="timeSlots.length !== 0"
+      type="button"
+      class="remove-button"
+      @click="removeTimeslots"
+    >
+      Remove
+    </button>
   </div>
 </template>
 
@@ -72,21 +41,18 @@ export default {
     msg: "",
     msgType: "error",
     selectedTimeslots: [],
-    loading: true,
+    loading: false,
   }),
 
   created() {
-    // Check authentication status first
     this.checkAuthStatus();
   },
-  
+
   mounted() {
-    // Setup socket connection for real-time updates
     this.setupSocketListeners();
   },
-  
+
   beforeUnmount() {
-    // Clean up socket listeners
     this.cleanupSocketListeners();
   },
 
@@ -109,7 +75,7 @@ export default {
           this.$router.push("/login");
         });
     },
-    
+
     loadTimeslots() {
       this.loading = true;
       
@@ -128,16 +94,18 @@ export default {
           this.msgType = "error";
           this.loading = false;
         });
-    },
-    
+      },
+
     setupSocketListeners() {
-      // Listen for real-time timeslot events
-      this.$socket = this.$root.io;
-      
-      if (this.$socket) {
-        this.$socket.on('timeslot:created', this.handleTimeslotCreated);
-        this.$socket.on('timeslot:deleted', this.handleTimeslotDeleted);
-        this.$socket.on('timeslot:booked', this.handleTimeslotBooked);
+    // Listen for real-time timeslot events
+      if (window.io) {
+        this.$socket = window.io();
+        
+        if (this.$socket) {
+          this.$socket.on('timeslot:created', this.handleTimeslotCreated);
+          this.$socket.on('timeslot:deleted', this.handleTimeslotDeleted);
+          this.$socket.on('timeslot:booked', this.handleTimeslotBooked);
+        }
       }
     },
     
@@ -171,17 +139,11 @@ export default {
     },
 
     addTimeslot() {
-      if (!this.newTimeslot) {
-        this.msg = "Please select a time";
-        this.msgType = "error";
-        return;
-      }
       
       // Check if time already exists for this assistant
       const exists = this.timeSlots.some(slot => slot.time === this.newTimeslot);
       if (exists) {
         this.msg = "This time already exists";
-        this.msgType = "error";
         return;
       }
       
@@ -202,17 +164,12 @@ export default {
           });
         }
         return res.json();
-      })
-      .then(data => {
-        // Timeslot will be added via socket event
-        this.msg = "Timeslot added successfully";
-        this.msgType = "success";
-        this.newTimeslot = "";
-      })
+      }).then(data => {
+          this.newTimeslot = "";
+        })
       .catch(error => {
         console.error('Error adding timeslot:', error);
         this.msg = error.message || "Failed to add timeslot";
-        this.msgType = "error";
       });
     },
 
@@ -234,14 +191,12 @@ export default {
       Promise.all(deletePromises)
         .then(() => {
           this.msg = "Selected timeslots removed";
-          this.msgType = "success";
           this.selectedTimeslots = [];
           // Timeslots will be removed via socket events
         })
         .catch(error => {
           console.error('Error removing timeslots:', error);
           this.msg = "Failed to remove some timeslots";
-          this.msgType = "error";
         });
     },
     
@@ -258,19 +213,15 @@ export default {
       .catch(error => {
         console.error('Logout error:', error);
         this.msg = "Failed to logout";
-        this.msgType = "error";
       });
-    }
+     
+    },
+    
   },
 };
 </script>
 
 <style scoped>
-.admin-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
 .admin-name {
   margin-bottom: 20px;
 }
@@ -278,29 +229,35 @@ export default {
 .timeslot-form {
   background-color: #fff;
   display: flex;
-  align-items: center;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  align-items: center; /* Aligns vertically in the center */
+  justify-content: space-between; /* Pushes elements apart */
+  padding: 10px;
+}
+
+.timeslots-list {
+  margin-bottom: 20px;
+}
+
+.timeslot-item {
   margin-bottom: 20px;
 }
 
 .time-input {
-  border: 1px solid #ced4da;
-  padding: 8px;
-  border-radius: 4px;
+  width: 100%; /* Makes sure input takes full space */
+  border: none;
+  outline: none;
+  background: none;
 }
 
 .input-container {
-  flex-grow: 1;
+  flex-grow: 1; /* Makes sure input takes up remaining space */
 }
 
-.timeslot-item {
+.remove-button {
   background-color: #fff;
-  transition: background-color 0.2s;
-}
-
-.timeslot-item:hover {
-  background-color: #f8f9fa;
+  color: red;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
 }
 </style>
