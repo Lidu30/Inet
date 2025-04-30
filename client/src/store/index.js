@@ -58,7 +58,7 @@ export default createStore({
     },
 
     removeTimeslot(state, timeslotId) {
-      state.timeSlots = state.timeSlots.filter(slot => slot.timeslot_id !== timeslotId);
+      state.timeSlots = state.timeSlots.filter(slot => slot.id !== timeslotId);
     },
 
     updateTimeslot(state, updatedTimeslot) {

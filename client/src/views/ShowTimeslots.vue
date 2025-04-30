@@ -57,7 +57,7 @@ export default {
 
     setupSocketListeners() {
       // Get socket connection from root
-      this.$socket = this.$root.io;
+      this.$socket = this.$root.socket;
       
       if (this.$socket) {
         // Listen for timeslot events
@@ -135,7 +135,7 @@ export default {
       })
       .then(() => {
         // Store selected timeslot info in store
-        this.$store.commit('setSelectedTime', time: timeslot.time, id: timeslot.id, admin: timeslot.assistantId);
+        this.$store.commit('setSelectedTime', {time: timeslot.time, id: timeslot.id, admin: timeslot.assistantId});
         this.$store.commit('setAdmin', timeslot.assistantId);
         this.$store.commit('setSelectedTimeslotId', timeslot.id);
         

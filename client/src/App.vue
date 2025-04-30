@@ -18,10 +18,10 @@
             >Available times</a>
         </li>
 
-        <li class="nav-item" v-if="isLoggedIn">
-          <a class="nav-link" href="#" @click="redirect('/admin')">Admin Panel</a>
+        <li v-if="isLoggedIn" class="nav-item">
+          <a class="nav-link" href="#" @click="redirect('/admin')">Admin</a>
         </li>
-        <li class="nav-item" v-if="isLoggedIn">
+        <li v-if="isLoggedIn" class="nav-item">
           <a class="nav-link" href="#" @click="logout">Logout</a>
         </li>
       </ul>
