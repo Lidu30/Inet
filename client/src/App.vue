@@ -33,18 +33,77 @@ import "bootstrap";
 export default {
   name: "App",
   components: {},
-  data: () => ({}),
-  mounted() {
-    const { commit, getters } = this.$store;
+  data: () => ({
+    socket:null
+  }),
+
+  computed: {
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    }
+  },
+
+  created() {
+    const { commit } = this.$store;
     const { push } = this.$router;
 
-    commit("setAuthenticated", false);
-    push(getters.isAuthenticated === true ? "/rooms" : "/login");
+     // Check authentication status
+    fetch("/api/auth/status")
+      .then(res => res.json())
+      .then(({ authenticated, username }) => {
+        commit("setLoggedIn", authenticated);
+        commit("setUsername", username || "");
+        commit("setAuthenticated", authenticated);
+      })
+      .catch(console.error);
+  },
+
+  mounted() {
+    // Initialize socket connection
+    this.socket = io();
+    
+    // Make socket available to child components
+    this.$root.socket = this.socket;
+    
+    // Setup global socket event listeners
+    this.socket.on('timeslot:created', (data) => {
+      this.$store.commit('addTimeslot', data);
+    });
+    
+    this.socket.on('timeslot:deleted', (data) => {
+      this.$store.commit('removeTimeslot', data.id);
+    });
+    
+    this.socket.on('timeslot:reserved', (data) => {
+      this.$store.commit('reserveTimeslot', data.id);
+    });
+    
+    this.socket.on('timeslot:released', (data) => {
+      this.$store.commit('unreserveTimeslot', data.id);
+    });
+    
+    this.socket.on('timeslot:booked', (data) => {
+      this.$store.commit('updateTimeslot', data);
+    });
   },
   methods: {
     redirect(target) {
       this.$router.push(target);
     },
+
+    logout() {
+      fetch("/api/logout", { 
+        method: "POST",
+        credentials: 'include'
+      })
+      .then(() => {
+        this.$store.commit("setLoggedIn", false);
+        this.$store.commit("setUsername", "");
+        this.$store.commit("setAuthenticated", false);
+        this.$router.push("/login");
+      })
+      .catch(console.error);
+    }
   },
 };
 </script>
