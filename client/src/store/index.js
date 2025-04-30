@@ -3,10 +3,12 @@ import { createStore } from "vuex";
 export default createStore({
   state: {
     authenticated: false,
+    loggedIn: false, 
+    username: "",
     username: "",
     timeSlots: [],
     selectedTime: "",
-    selectedTimeId: null,
+    selectedTimeslotId: null,
     admin: "",
     reservedSlots: new Set(),
   },
@@ -62,6 +64,10 @@ export default createStore({
 
     reserveTimeslot(state, timeslotId) {
       state.reservedSlots.add(timeslotId);
+    },
+
+    unreserveTimeslot(state, timeslotId) {
+      state.reservedSlots.delete(timeslotId);
     },
 
   },
@@ -143,7 +149,22 @@ export default createStore({
     },
 
     async addTimeslot({ commit }, time) {
-
+      const response = await fetch('/api/timeslots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ time })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        commit('addTimeslot', data);
+        return { success: true };
+      }
+      const error = await response.json();
+      return { success: false, error: error.error };
+    },
     
 
     // Handle socket events

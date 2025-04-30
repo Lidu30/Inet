@@ -24,8 +24,8 @@ await db.run(`
 
 const username = "test1";
 const password = "test1";
-const username1 = "test1";
-const password1 = "test1";
+const username1 = "test2";
+const password1 = "test2";
 
 try {
   await db.run("INSERT INTO users VALUES (?, ?)", [
@@ -47,12 +47,12 @@ await db.run(`
     timeslot_id INTEGER PRIMARY KEY,
     assistant_id TEXT NOT NULL,
     time TEXT NOT NULL,
-    booked INTEGER NOT NULL DEFAULT ,
+    booked INTEGER NOT NULL DEFAULT 0,
     booked_by TEXT
   )
 `);
 
-const timeslot_id = 1;
+const timeslotId = 1;
 const assistant_id = "Jacob1";
 const time = "15:00";
 const booked = 0;
@@ -60,7 +60,7 @@ const booked_by = null;
 
 try {
   await db.run("INSERT INTO timeslots VALUES (?, ?, ?, ?, ?)", [
-    timeslot_id,
+    timeslotId,
     assistant_id,
     time,
     booked,

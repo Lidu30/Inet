@@ -108,7 +108,6 @@ export default {
         }, 2000);
       });
     },
-    },
     cancel() {
 
       // Send cancellation request to server
@@ -127,6 +126,7 @@ export default {
         this.$router.push('/showTimeslots');
       });
     },
+  }
   
 };
 </script>

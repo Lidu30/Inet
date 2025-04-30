@@ -22,14 +22,14 @@
 <script>
 export default {
   data: () => ({
-    timeslots: [],
+    timeSlots: [],
     reservedTimeslots: new Set()
   }),
 
   
 
   created() {
-    this.timeSlots = this.$store.state.timeSlots;
+    this.loadTimeslots(); 
   },
 
   mounted() {
