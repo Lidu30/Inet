@@ -129,7 +129,7 @@ export default {
     
     handleTimeslotBooked(data) {
       // Update the timeslot's booked status
-      const index = this.timeSlots.findIndex(slot => slot.id == data.id);
+      const index = this.timeSlots.findIndex(slot => slot.id === data.id);
       if (index !== -1) {
         this.timeSlots[index].booked = true;
         this.timeSlots[index].bookedBy = data.studentName;
