@@ -68,6 +68,14 @@ export default {
     }, 10000); // 10 sekunder (10,000 ms)
   },
 
+  beforeUnmount() {
+    if (this.$socket) {
+      this.$socket.off('timeslot:created', this.handleTimeslotCreated);
+      this.$socket.off('timeslot:deleted', this.handleTimeslotDeleted);
+      this.$socket.off('timeslot:booked', this.handleTimeslotBooked);
+    }
+  },
+
   methods: {
     book() {
       if (!this.studentName) {

@@ -135,7 +135,7 @@ export default {
       })
       .then(() => {
         // Store selected timeslot info in store
-        this.$store.commit('setSelectedTime', timeslot.time);
+        this.$store.commit('setSelectedTime', time: timeslot.time, id: timeslot.id, admin: timeslot.assistantId);
         this.$store.commit('setAdmin', timeslot.assistantId);
         this.$store.commit('setSelectedTimeslotId', timeslot.id);
         

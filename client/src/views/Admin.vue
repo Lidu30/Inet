@@ -96,36 +96,15 @@ export default {
         });
       },
 
-      setupSocketListeners() {
-  // Listen for real-time timeslot events
-  if (window.io) {
-    const socket = window.io();
-    this.$socket = socket;
-    
-    if (this.$socket) {
-      this.$socket.on('timeslot:created', (data) => {
-        if (data.assistantId === this.username) {
-          // Add to the list if it's one of this assistant's timeslots
-          this.timeSlots.push(data);
-        }
-      });
-      
-      this.$socket.on('timeslot:deleted', (data) => {
-        // Remove from the list
-        this.timeSlots = this.timeSlots.filter(slot => slot.id !== data.id);
-      });
-      
-      this.$socket.on('timeslot:booked', (data) => {
-        // Update the timeslot's booked status
-        const index = this.timeSlots.findIndex(slot => slot.id == data.id);
-        if (index !== -1) {
-          this.timeSlots[index].booked = true;
-          this.timeSlots[index].bookedBy = data.studentName;
-        }
-      });
-    }
-  }
-},
+    setupSocketListeners() {
+      this.$socket = this.$root.socket;
+      if (this.$socket) {
+        this.$socket.on('timeslot:created', this.handleTimeslotCreated);
+        this.$socket.on('timeslot:deleted', this.handleTimeslotDeleted);
+        this.$socket.on('timeslot:booked', this.handleTimeslotBooked);
+      }
+  
+    },
     
 
     cleanupSocketListeners() {

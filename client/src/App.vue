@@ -15,8 +15,14 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#" @click="redirect('/showTimeslots')"
-            >Available times</a
-          >
+            >Available times</a>
+        </li>
+
+        <li class="nav-item" v-if="isLoggedIn">
+          <a class="nav-link" href="#" @click="redirect('/admin')">Admin Panel</a>
+        </li>
+        <li class="nav-item" v-if="isLoggedIn">
+          <a class="nav-link" href="#" @click="logout">Logout</a>
         </li>
       </ul>
     </div>
@@ -29,7 +35,7 @@
 <script>
 // @ is an alias to /src
 import "bootstrap";
-
+import io from "socket.io-client";
 export default {
   name: "App",
   components: {},
@@ -45,7 +51,6 @@ export default {
 
   created() {
     const { commit } = this.$store;
-    const { push } = this.$router;
 
      // Check authentication status
     fetch("/api/auth/status")
@@ -54,6 +59,13 @@ export default {
         commit("setLoggedIn", authenticated);
         commit("setUsername", username || "");
         commit("setAuthenticated", authenticated);
+
+        if (authenticated) {
+        this.$router.push('/admin');
+      } else {
+        this.$router.push('/login');
+      }
+
       })
       .catch(console.error);
   },
