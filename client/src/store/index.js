@@ -3,7 +3,7 @@ import { createStore } from "vuex";
 export default createStore({
   state: {
     authenticated: false,
-    loggedIn: false, 
+    loggedIn: false,
     username: "",
     timeSlots: [],
     selectedTime: "",
@@ -20,13 +20,14 @@ export default createStore({
     },
 
     availableTimeSlots(state) {
-      return state.timeSlots.filter(slot => !slot.booked && !state.reservedSlots.has(slot.timeslot_id));
+      return state.timeSlots.filter(
+        (slot) => !slot.booked && !state.reservedSlots.has(slot.timeslot_id)
+      );
     },
 
     bookedTimeSlots(state) {
-      return state.timeSlots.filter(slot => slot.booked);
+      return state.timeSlots.filter((slot) => slot.booked);
     },
-
   },
   mutations: {
     setAuthenticated(state, authenticated) {
@@ -36,7 +37,7 @@ export default createStore({
     setLoggedIn(state, status) {
       state.loggedIn = status;
     },
-  
+
     setUsername(state, username) {
       state.username = username;
     },
@@ -50,6 +51,11 @@ export default createStore({
       state.selectedTimeId = id;
       state.admin = admin;
     },
+
+    setSelectedTimeslotId(state, id) {
+      state.selectedTimeslotId = id;
+    },
+
     setAdmin(state, admin) {
       state.admin = admin;
     },
@@ -58,11 +64,15 @@ export default createStore({
     },
 
     removeTimeslot(state, timeslotId) {
-      state.timeSlots = state.timeSlots.filter(slot => slot.id !== timeslotId);
+      state.timeSlots = state.timeSlots.filter(
+        (slot) => slot.id !== timeslotId
+      );
     },
 
     updateTimeslot(state, updatedTimeslot) {
-      const index = state.timeSlots.findIndex(slot => slot.timeslot_id === updatedTimeslot.timeslot_id);
+      const index = state.timeSlots.findIndex(
+        (slot) => slot.timeslot_id === updatedTimeslot.timeslot_id
+      );
       if (index !== -1) {
         state.timeSlots.splice(index, 1, updatedTimeslot);
       }
@@ -75,7 +85,6 @@ export default createStore({
     unreserveTimeslot(state, timeslotId) {
       state.reservedSlots.delete(timeslotId);
     },
-
   },
 
   actions: {
@@ -96,10 +105,10 @@ export default createStore({
           commit("setUsername", "");
           commit("setAuthenticated", false);
         })
-        .catch(error => console.error("Logout error:", error));
+        .catch((error) => console.error("Logout error:", error));
     },
     // Other actions are implemented in the components directly
   },
-    
+
   modules: {},
 });

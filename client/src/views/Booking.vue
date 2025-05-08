@@ -50,10 +50,9 @@ export default {
     this.timeslotId = this.$store.state.selectedTimeslotId;
 
     if (!this.timeslot || !this.admin || !this.timeslotId) {
-      this.$router.push('/showTimeslots');
+      this.$router.push("/showTimeslots");
     }
   },
-
 
   mounted() {
     this.countdownInterval = setInterval(() => {
@@ -78,55 +77,53 @@ export default {
       fetch(`/api/timeslots/${this.timeslotId}/book`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          studentName: this.studentName
+          studentName: this.studentName,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            return res.json().then((data) => {
+              throw new Error(data.error || "Failed to book timeslot");
+            });
+          }
+          return res.json();
         })
-      })
-      .then(res => {
-        if (!res.ok) {
-          return res.json().then(data => {
-            throw new Error(data.error || "Failed to book timeslot");
-          });
-        }
-        return res.json();
-      })
-      .then(() => {
-        // Redirect back to timeslots page
-        this.$router.push('/showTimeslots');
-        clearTimeout(this.redirectTimeout);
-      })
-      .catch(error => {
-        console.error('Error booking timeslot:', error);
-        this.msg = error.message || "Failed to book timeslot";
-        
-        // Still redirect after a short delay
-        setTimeout(() => {
-          this.$router.push('/showTimeslots');
+        .then(() => {
+          // Redirect back to timeslots page
+          this.$router.push("/showTimeslots");
           clearTimeout(this.redirectTimeout);
-        }, 2000);
-      });
+        })
+        .catch((error) => {
+          console.error("Error booking timeslot:", error);
+          this.msg = error.message || "Failed to book timeslot";
+
+          // Still redirect after a short delay
+          setTimeout(() => {
+            this.$router.push("/showTimeslots");
+            clearTimeout(this.redirectTimeout);
+          }, 2000);
+        });
     },
     cancel() {
-
       // Send cancellation request to server
       fetch(`/api/timeslots/${this.timeslotId}/cancel`, {
-        method: "POST"
+        method: "POST",
       })
-      .then(() => {
-        // Redirect back to timeslots page
-        clearTimeout(this.redirectTimeout);
-        this.$router.push('/showTimeslots');
-      })
-      .catch(error => {
-        console.error('Error canceling reservation:', error);
-        // Still redirect on error
-        clearTimeout(this.redirectTimeout);
-        this.$router.push('/showTimeslots');
-      });
+        .then(() => {
+          // Redirect back to timeslots page
+          clearTimeout(this.redirectTimeout);
+          this.$router.push("/showTimeslots");
+        })
+        .catch((error) => {
+          console.error("Error canceling reservation:", error);
+          // Still redirect on error
+          clearTimeout(this.redirectTimeout);
+          this.$router.push("/showTimeslots");
+        });
     },
-  }
-  
+  },
 };
 </script>

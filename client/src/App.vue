@@ -15,7 +15,8 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#" @click="redirect('/showTimeslots')"
-            >Available times</a>
+            >Available times</a
+          >
         </li>
 
         <li v-if="isLoggedIn" class="nav-item">
@@ -36,36 +37,36 @@
 // @ is an alias to /src
 import "bootstrap";
 import io from "socket.io-client";
+
 export default {
   name: "App",
   components: {},
   data: () => ({
-    socket:null
+    socket: null,
   }),
 
   computed: {
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
-    }
+    },
   },
 
   created() {
     const { commit } = this.$store;
 
-     // Check authentication status
+    // Check authentication status
     fetch("/api/auth/status")
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(({ authenticated, username }) => {
         commit("setLoggedIn", authenticated);
         commit("setUsername", username || "");
         commit("setAuthenticated", authenticated);
 
         if (authenticated) {
-        this.$router.push('/admin');
-      } else {
-        this.$router.push('/login');
-      }
-
+          this.$router.push("/admin");
+        } else {
+          this.$router.push("/login");
+        }
       })
       .catch(console.error);
   },
@@ -73,29 +74,29 @@ export default {
   mounted() {
     // Initialize socket connection
     this.socket = io();
-    
+
     // Make socket available to child components
     this.$root.socket = this.socket;
-    
+
     // Setup global socket event listeners
-    this.socket.on('timeslot:created', (data) => {
-      this.$store.commit('addTimeslot', data);
+    this.socket.on("timeslot:created", (data) => {
+      this.$store.commit("addTimeslot", data);
     });
-    
-    this.socket.on('timeslot:deleted', (data) => {
-      this.$store.commit('removeTimeslot', data.id);
+
+    this.socket.on("timeslot:deleted", (data) => {
+      this.$store.commit("removeTimeslot", data.id);
     });
-    
-    this.socket.on('timeslot:reserved', (data) => {
-      this.$store.commit('reserveTimeslot', data.id);
+
+    this.socket.on("timeslot:reserved", (data) => {
+      this.$store.commit("reserveTimeslot", data.id);
     });
-    
-    this.socket.on('timeslot:released', (data) => {
-      this.$store.commit('unreserveTimeslot', data.id);
+
+    this.socket.on("timeslot:released", (data) => {
+      this.$store.commit("unreserveTimeslot", data.id);
     });
-    
-    this.socket.on('timeslot:booked', (data) => {
-      this.$store.commit('updateTimeslot', data);
+
+    this.socket.on("timeslot:booked", (data) => {
+      this.$store.commit("updateTimeslot", data);
     });
   },
   methods: {
@@ -104,18 +105,18 @@ export default {
     },
 
     logout() {
-      fetch("/api/logout", { 
+      fetch("/api/logout", {
         method: "POST",
-        credentials: 'include'
+        credentials: "include",
       })
-      .then(() => {
-        this.$store.commit("setLoggedIn", false);
-        this.$store.commit("setUsername", "");
-        this.$store.commit("setAuthenticated", false);
-        this.$router.push("/login");
-      })
-      .catch(console.error);
-    }
+        .then(() => {
+          this.$store.commit("setLoggedIn", false);
+          this.$store.commit("setUsername", "");
+          this.$store.commit("setAuthenticated", false);
+          this.$router.push("/login");
+        })
+        .catch(console.error);
+    },
   },
 };
 </script>

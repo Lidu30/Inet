@@ -80,10 +80,10 @@ publicRouter.post('/timeslots/:id/reserve', async (req, res) => {
             }
         }, 10000); // 10 seconds
         
-        res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error reserving timeslot:', error);
-        res.status(500).json({ error: 'Failed to reserve timeslot' });
+        return res.status(500).json({ error: 'Failed to reserve timeslot' });
     }
 });
 
@@ -119,10 +119,10 @@ publicRouter.post('/timeslots/:id/book', async (req, res) => {
             studentName 
         });
         
-        res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error booking timeslot:', error);
-        res.status(500).json({ error: 'Failed to book timeslot' });
+        return res.status(500).json({ error: 'Failed to book timeslot' });
     }
 });
 
@@ -141,10 +141,10 @@ publicRouter.post('/timeslots/:id/cancel', async (req, res) => {
         // Notify all connected clients
         model.io.emit('timeslot:released', { id });
         
-        res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error canceling reservation:', error);
-        res.status(500).json({ error: 'Failed to cancel reservation' });
+        return res.status(500).json({ error: 'Failed to cancel reservation' });
     }
 });
 
@@ -190,14 +190,14 @@ privateRouter.post('/timeslots', requireAuth, async (req, res) => {
             booked: false
         });
         
-        res.status(201).json({ 
+        return res.status(201).json({ 
             id: timeslotId,
             time,
             assistantId: assistant
         });
     } catch (error) {
         console.error('Error creating timeslot:', error);
-        res.status(500).json({ error: 'Failed to create timeslot' });
+        return res.status(500).json({ error: 'Failed to create timeslot' });
     }
 });
 
@@ -228,10 +228,10 @@ privateRouter.delete('/timeslots/:id', requireAuth, async (req, res) => {
         // Notify all connected clients
         model.io.emit('timeslot:deleted', { id });
         
-        res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error deleting timeslot:', error);
-        res.status(500).json({ error: 'Failed to delete timeslot' });
+        return res.status(500).json({ error: 'Failed to delete timeslot' });
     }
 });
 

@@ -10,9 +10,11 @@
       class="timeslot-list"
     >
       <button type="button" @click="selectTime(timeslot)">
-        {{ timeslot.time }} | {{ timeslot.assistantId }} | 
+        {{ timeslot.time }} | {{ timeslot.assistantId }} |
         <span v-if="timeslot.booked" class="status booked">BOOKED</span>
-        <span v-else-if="isReserved(timeslot.id)" class="status reserved">RESERVED</span>
+        <span v-else-if="isReserved(timeslot.id)" class="status reserved"
+          >RESERVED</span
+        >
         <span v-else class="status available">AVAILABLE</span>
       </button>
     </div>
@@ -23,13 +25,11 @@
 export default {
   data: () => ({
     timeSlots: [],
-    reservedTimeslots: new Set()
+    reservedTimeslots: new Set(),
   }),
 
-  
-
   created() {
-    this.loadTimeslots(); 
+    this.loadTimeslots();
   },
 
   mounted() {
@@ -41,41 +41,41 @@ export default {
     // Clean up socket listeners
     this.cleanupSocketListeners();
   },
-  
+
   methods: {
     loadTimeslots() {
       // Fetch timeslots from server
       fetch("/api/timeslots")
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           this.timeSlots = data.timeslots;
         })
-        .catch(error => {
-          console.error('Error loading timeslots:', error);
+        .catch((error) => {
+          console.error("Error loading timeslots:", error);
         });
     },
 
     setupSocketListeners() {
       // Get socket connection from root
       this.$socket = this.$root.socket;
-      
+
       if (this.$socket) {
         // Listen for timeslot events
-        this.$socket.on('timeslot:created', this.handleTimeslotCreated);
-        this.$socket.on('timeslot:deleted', this.handleTimeslotDeleted);
-        this.$socket.on('timeslot:booked', this.handleTimeslotBooked);
-        this.$socket.on('timeslot:reserved', this.handleTimeslotReserved);
-        this.$socket.on('timeslot:released', this.handleTimeslotReleased);
+        this.$socket.on("timeslot:created", this.handleTimeslotCreated);
+        this.$socket.on("timeslot:deleted", this.handleTimeslotDeleted);
+        this.$socket.on("timeslot:booked", this.handleTimeslotBooked);
+        this.$socket.on("timeslot:reserved", this.handleTimeslotReserved);
+        this.$socket.on("timeslot:released", this.handleTimeslotReleased);
       }
     },
 
     cleanupSocketListeners() {
       if (this.$socket) {
-        this.$socket.off('timeslot:created');
-        this.$socket.off('timeslot:deleted');
-        this.$socket.off('timeslot:booked');
-        this.$socket.off('timeslot:reserved');
-        this.$socket.off('timeslot:released');
+        this.$socket.off("timeslot:created");
+        this.$socket.off("timeslot:deleted");
+        this.$socket.off("timeslot:booked");
+        this.$socket.off("timeslot:reserved");
+        this.$socket.off("timeslot:released");
       }
     },
 
@@ -83,17 +83,17 @@ export default {
     handleTimeslotCreated(data) {
       this.timeSlots.push(data);
     },
-    
+
     // If the assistant deletes the time
     handleTimeslotDeleted(data) {
-      this.timeSlots = this.timeSlots.filter(slot => slot.id !== data.id);
+      this.timeSlots = this.timeSlots.filter((slot) => slot.id !== data.id);
       if (this.reservedTimeslots.has(data.id)) {
         this.reservedTimeslots.delete(data.id);
       }
     },
 
     handleTimeslotBooked(data) {
-      const slotFound = this.timeSlots.find(slot => slot.id === data.id);
+      const slotFound = this.timeSlots.find((slot) => slot.id === data.id);
       if (slotFound) {
         slotFound.booked = true;
         slotFound.bookedBy = data.studentName;
@@ -123,33 +123,36 @@ export default {
         return;
       }
 
-  // Reserve the timeslot on the server
-    fetch(`/api/timeslots/${timeslot.id}/reserve`, {
-      method: "POST"
+      // Reserve the timeslot on the server
+      fetch(`/api/timeslots/${timeslot.id}/reserve`, {
+        method: "POST",
       })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Failed to reserve timeslot");
-        }
-        return res.json();
-      })
-      .then(() => {
-        // Store selected timeslot info in store
-        this.$store.commit('setSelectedTime', {time: timeslot.time, id: timeslot.id, admin: timeslot.assistantId});
-        this.$store.commit('setAdmin', timeslot.assistantId);
-        this.$store.commit('setSelectedTimeslotId', timeslot.id);
-        
-        // Navigate to booking page
-        this.$router.push("/booking");
-      })
-      .catch(error => {
-        console.error('Error reserving timeslot:', error);
-        this.loadTimeslots();
-      });
-    }
-  }
-};
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to reserve timeslot");
+          }
+          return res.json();
+        })
+        .then(() => {
+          // Store selected timeslot info in store
+          this.$store.commit("setSelectedTime", {
+            time: timeslot.time,
+            id: timeslot.id,
+            admin: timeslot.assistantId,
+          });
+          this.$store.commit("setAdmin", timeslot.assistantId);
+          this.$store.commit("setSelectedTimeslotId", timeslot.id);
 
+          // Navigate to booking page
+          this.$router.push("/booking");
+        })
+        .catch((error) => {
+          console.error("Error reserving timeslot:", error);
+          this.loadTimeslots();
+        });
+    },
+  },
+};
 </script>
 
 <style scoped>

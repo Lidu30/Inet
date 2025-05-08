@@ -22,11 +22,11 @@ const requireAuth = (req, res, next) => {
     }
 };
 
-// Defines a route for handling the login form submission
+//  Gives a route for handling the login form submission
 publicRouter.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  // Validate input
+  // Here we check the passowrds
   const validPassword = 
         password && password.length >= 3 && 
         /[a-zA-Z]/.test(password) && /\d/.test(password);
@@ -56,13 +56,18 @@ publicRouter.post('/login', async (req, res) => {
     // Create assistant in the model and associate with session
     model.createAssistant(username, req.session.id);
     
-    req.session.save((err) => {
+    return new Promise((resolve, reject) => {
+      req.session.save((err) => {
         if (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Failed to save session' });
-        } 
-        console.debug(`Saved assistant session: ${username}`);
-        return res.status(200).json({ authenticated: true, username }); 
+          console.error(err);
+          res.status(500).json({ error: 'Failed to save session' });
+          resolve();
+        } else {
+          console.debug(`Saved assistant session: ${username}`);
+          res.status(200).json({ authenticated: true, username });
+          resolve();
+        }
+      });
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -79,13 +84,16 @@ publicRouter.post('/logout', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
   
-  // Destroy the session
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Logout error:', err);
-      return res.status(500).json({ error: 'Failed to logout' });
-    }
-    return res.status(200).json({ success: true });
+  return new Promise((resolve) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        res.status(500).json({ error: 'Failed to logout' });
+      } else {
+        res.status(200).json({ success: true });
+      }
+      resolve();
+    });
   });
 });
 

@@ -1,25 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import store from "../store";
-import Rooms from "../views/Rooms.vue";
-import Room from "../views/Room.vue";
+// import Rooms from "../views/Rooms.vue";
+// import Room from "../views/Room.vue";
 import Login from "../views/Login.vue";
 import Admin from "../views/Admin.vue";
 import Booking from "../views/Booking.vue";
 import ShowTimeslots from "../views/ShowTimeslots.vue";
 
 const routes = [
-  {
-    path: "/",
-    redirect: "/rooms",
-  },
-  {
-    path: "/rooms",
-    component: Rooms,
-  },
-  {
-    path: "/rooms/:name",
-    component: Room,
-  },
   {
     path: "/login",
     component: Login,
