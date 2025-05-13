@@ -56,7 +56,7 @@ publicRouter.post('/login', async (req, res) => {
     // Create assistant in the model and associate with session
     model.createAssistant(username, req.session.id);
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       req.session.save((err) => {
         if (err) {
           console.error(err);
