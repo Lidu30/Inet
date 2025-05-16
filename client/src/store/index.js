@@ -19,11 +19,11 @@ export default createStore({
       return state.loggedIn;
     },
 
-    availableTimeSlots(state) {
-      return state.timeSlots.filter(
-        (slot) => !slot.booked && !state.reservedSlots.has(String (slot.id))
-      );
-    },
+    // availableTimeSlots(state) {
+      // return state.timeSlots.filter(
+        // (slot) => !slot.booked && !state.reservedSlots.has(String (slot.id))
+      // );
+    // },
 
     alltimeslots (state){
       return state.timeSlots;
@@ -72,12 +72,13 @@ export default createStore({
         (slot) => String(slot.id) !== String(timeslotId)      );
     },
 
-    updateTimeslot(state, updatedTimeslot) {
+    updateTimeslot(state, bookedTimeSlot) {
       const index = state.timeSlots.findIndex(
-        (slot) => String(slot.id) === String(updatedTimeslot.id)
+        (slot) => String(slot.id) === String(bookedTimeSlot.id)
       );
       if (index !== -1) {
-        state.timeSlots.splice(index, 1, updatedTimeslot);
+        state.timeSlots[index].booked = 1;
+        state.reservedSlots.delete(bookedTimeSlot.id);
       }
     },
 

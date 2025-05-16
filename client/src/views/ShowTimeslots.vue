@@ -32,7 +32,7 @@ export default {
       return this.$store.getters.alltimeslots;
     },
     isReserved() {
-      return (id) => this.$store.state.reservedSlots.has(id);
+      return (id) => this.$store.state.reservedSlots.has( String(id));
     }
 },
 

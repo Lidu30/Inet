@@ -104,15 +104,29 @@ publicRouter.post('/timeslots/:id/book', async (req, res) => {
         'UPDATE timeslots SET booked = 1, booked_by = ? WHERE timeslot_id = ?',
         [studentName, id]
     );
+
+    const timeslot = await db.get(
+            'SELECT * FROM timeslots WHERE timeslot_id = ?',
+            [id]
+        );
+        
+        if (!timeslot) {
+            throw new Error('Timeslot not found after booking');
+        }
     
     // Update the model and release reservation
     model.bookTimeslot(id, studentName);
+
+    const formattedTimeslot = {
+            id: timeslot.timeslot_id,
+            assistantId: timeslot.assistant_id,
+            time: timeslot.time,
+            booked: true,
+            bookedBy: studentName
+        };
     
     // Notify all clients about the booking
-    model.io.emit('timeslot:booked', { 
-        id, 
-        studentName 
-    });
+    model.io.emit('timeslot:booked', formattedTimeslot);
     
     return res.status(200).json({ success: true });
    
