@@ -7,12 +7,12 @@ export default createStore({
     username: "",
     timeSlots: [],
     selectedTime: {
-    time: "",
-    id: null,
+    timeslot: "",
+    timeslotId: null,
     assistant_id: ""
   },
-    selectedTimeslotId: null,
-    admin: "",
+    // selectedTimeslotId: null,
+    // admin: "",
     reservedSlots: new Set(),
   },
   getters: {
@@ -55,9 +55,11 @@ export default createStore({
     },
 
     setSelectedTime(state, { time, id, admin }) {
-      state.selectedTime.time = time;
-      state.selectedTime.id = id;
-      state.selectedTime.assistant_id = admin;
+      state.selectedTime = {
+        timeslot: time,
+        timeslotId: id,
+        assistant_id: admin
+      };
     },
 
     // setSelectedTimeslotId(state, id) {

@@ -2,8 +2,8 @@
   <h1>Confirm booking</h1>
 
   <div class="col">
-    <p>Chosen time slot: {{ timeslot.time }}</p>
-    <p>Assistant: {{ timeslot.assistant.id }}</p>
+    <p>Chosen time slot: {{ selectedTime.timeslot }}</p>
+    <p>Assistant: {{ selectedTime.assistant_id }}</p>
 
     <p v-if="msg" class="alert alert-danger">{{ msg }}</p>
     <label for="studentname" class="form-label h4"></label>
@@ -36,8 +36,8 @@ export default {
   data() {
     return {
       selectedTime: {
-        time: "",
-        id: null,
+        timeslot: "",
+        timeslotId: null,
         assistant_id: ""
       },
       studentName: "",
@@ -47,11 +47,11 @@ export default {
   },
 
   created() {
-    this.timeslot = this.$store.state.selectedTime;
+    this.selectedTime = this.$store.state.selectedTime;
 
-    if (!this.timeslot || !this.admin || !this.timeslotId) {
-      this.$router.push("/showTimeslots");
-    }
+    // if (!this.selectedTime.time || !this.admin || !this.timeslotId) {
+      // this.$router.push("/showTimeslots");
+    // }
   },
 
   mounted() {
