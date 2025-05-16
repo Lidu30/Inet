@@ -77,8 +77,8 @@ export default {
             id: timeslot.id,
             admin: timeslot.assistantId,
           });
-          this.$store.commit("setAdmin", timeslot.assistantId);
-          this.$store.commit("setSelectedTimeslotId", timeslot.id);
+          // this.$store.commit("setAdmin", timeslot.assistantId);
+          // this.$store.commit("setSelectedTimeslotId", timeslot.id);
 
           // Navigate to booking page
           this.$router.push("/booking");

@@ -6,7 +6,11 @@ export default createStore({
     loggedIn: false,
     username: "",
     timeSlots: [],
-    selectedTime: "",
+    selectedTime: {
+    time: "",
+    id: null,
+    assistant_id: ""
+  },
     selectedTimeslotId: null,
     admin: "",
     reservedSlots: new Set(),
@@ -51,18 +55,18 @@ export default createStore({
     },
 
     setSelectedTime(state, { time, id, admin }) {
-      state.selectedTime = time;
-      state.selectedTimeId = id;
-      state.admin = admin;
+      state.selectedTime.time = time;
+      state.selectedTime.id = id;
+      state.selectedTime.assistant_id = admin;
     },
 
-    setSelectedTimeslotId(state, id) {
-      state.selectedTimeslotId = id;
-    },
+    // setSelectedTimeslotId(state, id) {
+      // state.selectedTimeslotId = id;
+    // },
 
-    setAdmin(state, admin) {
-      state.admin = admin;
-    },
+    // setAdmin(state, admin) {
+      // state.admin = admin;
+    // },
     addTimeslot(state, timeslot) {
       state.timeSlots.push(timeslot);
     },

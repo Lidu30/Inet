@@ -2,8 +2,8 @@
   <h1>Confirm booking</h1>
 
   <div class="col">
-    <p>Chosen time slot: {{ timeslot }}</p>
-    <p>Assistant: {{ admin }}</p>
+    <p>Chosen time slot: {{ timeslot.time }}</p>
+    <p>Assistant: {{ timeslot.assistant.id }}</p>
 
     <p v-if="msg" class="alert alert-danger">{{ msg }}</p>
     <label for="studentname" class="form-label h4"></label>
@@ -35,9 +35,11 @@ export default {
   name: "ConfirmBooking",
   data() {
     return {
-      timeslot: "", // Example hardcoded value
-      admin: "", // Example assistant
-      timeslotId: null,
+      selectedTime: {
+        time: "",
+        id: null,
+        assistant_id: ""
+      },
       studentName: "",
       msg: "",
       countdown: 10,
@@ -46,8 +48,6 @@ export default {
 
   created() {
     this.timeslot = this.$store.state.selectedTime;
-    this.admin = this.$store.state.admin;
-    this.timeslotId = this.$store.state.selectedTimeslotId;
 
     if (!this.timeslot || !this.admin || !this.timeslotId) {
       this.$router.push("/showTimeslots");
