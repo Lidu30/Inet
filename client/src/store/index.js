@@ -25,6 +25,10 @@ export default createStore({
       );
     },
 
+    alltimeslots (state){
+      return state.timeSlots;
+    },
+
     bookedTimeSlots(state) {
       return state.timeSlots.filter((slot) => slot.booked);
     },
@@ -70,7 +74,7 @@ export default createStore({
 
     updateTimeslot(state, updatedTimeslot) {
       const index = state.timeSlots.findIndex(
-        (slot) => slot.timeslot_id === updatedTimeslot.timeslot_id
+        (slot) => slot.id === updatedTimeslot.id
       );
       if (index !== -1) {
         state.timeSlots.splice(index, 1, updatedTimeslot);
@@ -106,7 +110,6 @@ export default createStore({
         })
         .catch((error) => console.error("Logout error:", error));
     },
-    // Other actions are implemented in the components directly
   },
 
   modules: {},

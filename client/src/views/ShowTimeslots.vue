@@ -24,22 +24,20 @@
 <script>
 export default {
   data: () => ({
-    timeSlots: [],
-    reservedTimeslots: new Set(),
   }),
+
+  computed: {
+    timeSlots() {
+      // Use the store's getter for available time slots
+      return this.$store.getters.alltimeslots;
+    },
+    isReserved() {
+      return (id) => this.$store.state.reservedSlots.has(id);
+    }
+},
 
   created() {
     this.loadTimeslots();
-  },
-
-  mounted() {
-    // Setup socket listeners for real-time updates
-    this.setupSocketListeners();
-  },
-
-  beforeUnmount() {
-    // Clean up socket listeners
-    this.cleanupSocketListeners();
   },
 
   methods: {
@@ -48,18 +46,13 @@ export default {
       fetch("/api/timeslots")
         .then((res) => res.json())
         .then((data) => {
-          this.timeSlots = data.timeslots;
+          this.$store.commit("setTimeSlots", data.timeslots);
         })
         .catch((error) => {
           console.error("Error loading timeslots:", error);
         });
     },
 
-    
-
-    isReserved(id) {
-      return this.reservedTimeslots.has(id);
-    },
 
     selectTime(timeslot) {
       // Don't proceed if slot is booked or reserved
