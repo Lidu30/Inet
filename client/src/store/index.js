@@ -21,7 +21,7 @@ export default createStore({
 
     availableTimeSlots(state) {
       return state.timeSlots.filter(
-        (slot) => !slot.booked && !state.reservedSlots.has(slot.timeslot_id)
+        (slot) => !slot.booked && !state.reservedSlots.has(String (slot.id))
       );
     },
 
@@ -69,12 +69,12 @@ export default createStore({
 
     removeTimeslot(state, timeslotId) {
       state.timeSlots = state.timeSlots.filter(
-        (slot) => String (slot.id) !== String (timeslotId)      );
+        (slot) => String(slot.id) !== String(timeslotId)      );
     },
 
     updateTimeslot(state, updatedTimeslot) {
       const index = state.timeSlots.findIndex(
-        (slot) => slot.id === updatedTimeslot.id
+        (slot) => String(slot.id) === String(updatedTimeslot.id)
       );
       if (index !== -1) {
         state.timeSlots.splice(index, 1, updatedTimeslot);
