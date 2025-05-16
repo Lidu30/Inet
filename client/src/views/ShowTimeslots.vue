@@ -55,63 +55,7 @@ export default {
         });
     },
 
-    setupSocketListeners() {
-      // Get socket connection from root
-      this.$socket = this.$root.socket;
-
-      if (this.$socket) {
-        // Listen for timeslot events
-        this.$socket.on("timeslot:created", this.handleTimeslotCreated);
-        this.$socket.on("timeslot:deleted", this.handleTimeslotDeleted);
-        this.$socket.on("timeslot:booked", this.handleTimeslotBooked);
-        this.$socket.on("timeslot:reserved", this.handleTimeslotReserved);
-        this.$socket.on("timeslot:released", this.handleTimeslotReleased);
-      }
-    },
-
-    cleanupSocketListeners() {
-      if (this.$socket) {
-        this.$socket.off("timeslot:created");
-        this.$socket.off("timeslot:deleted");
-        this.$socket.off("timeslot:booked");
-        this.$socket.off("timeslot:reserved");
-        this.$socket.off("timeslot:released");
-      }
-    },
-
-    // Socket event handlers
-    handleTimeslotCreated(data) {
-      this.timeSlots.push(data);
-    },
-
-    // If the assistant deletes the time
-    handleTimeslotDeleted(data) {
-      this.timeSlots = this.timeSlots.filter((slot) => slot.id !== data.id);
-      if (this.reservedTimeslots.has(data.id)) {
-        this.reservedTimeslots.delete(data.id);
-      }
-    },
-
-    handleTimeslotBooked(data) {
-      const slotFound = this.timeSlots.find((slot) => slot.id === data.id);
-      if (slotFound) {
-        slotFound.booked = true;
-        slotFound.bookedBy = data.studentName;
-      }
-      if (this.reservedTimeslots.has(data.id)) {
-        this.reservedTimeslots.delete(data.id);
-      }
-    },
-
-    handleTimeslotReserved(data) {
-      this.reservedTimeslots.add(data.id);
-    },
-
-    handleTimeslotReleased(data) {
-      if (this.reservedTimeslots.has(data.id)) {
-        this.reservedTimeslots.delete(data.id);
-      }
-    },
+    
 
     isReserved(id) {
       return this.reservedTimeslots.has(id);

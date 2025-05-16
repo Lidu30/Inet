@@ -78,6 +78,18 @@ export default {
     // Make socket available to child components
     this.$root.socket = this.socket;
 
+    this.socket.on('connect', () => {
+      console.log('Socket connected with ID:', this.socket.id);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+
     // Setup global socket event listeners
     this.socket.on("timeslot:created", (data) => {
       this.$store.commit("addTimeslot", data);

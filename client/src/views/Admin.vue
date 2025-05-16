@@ -32,7 +32,6 @@ export default {
   name: "AdminView",
   data: () => ({
     username: "",
-    timeSlots: [],
     newTimeslot: "",
     msg: "",
     msgType: "error",
@@ -40,17 +39,19 @@ export default {
     loading: false,
   }),
 
+  computed: {
+    timeSlots() {
+      // Filter timeslots from the store to only show this admin's slots
+      return this.$store.state.timeSlots.filter(
+        slot => slot.assistantId === this.username
+      );
+    }
+  },
+
   created() {
     this.checkAuthStatus();
   },
 
-  mounted() {
-    this.setupSocketListeners();
-  },
-
-  beforeUnmount() {
-    this.cleanupSocketListeners();
-  },
 
   methods: {
     checkAuthStatus() {
@@ -78,10 +79,7 @@ export default {
       fetch("/api/timeslots")
         .then((res) => res.json())
         .then((data) => {
-          // Filter to only show this assistant's timeslots
-          this.timeSlots = data.timeslots.filter(
-            (slot) => slot.assistantId === this.username
-          );
+          this.$store.commit("setTimeSlots", data.timeslots);
           this.loading = false;
         })
         .catch((error) => {
@@ -90,54 +88,6 @@ export default {
           this.msgType = "error";
           this.loading = false;
         });
-    },
-
-    setupSocketListeners() {
-      this.$socket = this.$root.socket;
-      if (this.$socket) {
-        this.$socket.on("timeslot:created", this.handleTimeslotCreated);
-        this.$socket.on("timeslot:deleted", this.handleTimeslotDeleted);
-        this.$socket.on("timeslot:booked", this.handleTimeslotBooked);
-      }
-    },
-
-    cleanupSocketListeners() {
-      if (this.$socket) {
-        this.$socket.off("timeslot:created");
-        this.$socket.off("timeslot:deleted");
-        this.$socket.off("timeslot:booked");
-      }
-    },
-
-    handleTimeslotCreated(data) {
-      if (data.assistantId === this.username) {
-        // Add to the list if it's one of this assistant's timeslots
-        this.timeSlots.push(data);
-      }
-    },
-
-    handleTimeslotDeleted(data) {
-      // Convert the ID to string to ensure type consistency
-      const idToRemove = String(data.id);
-
-      // Remove from the list - ensure string comparison
-      this.timeSlots = this.timeSlots.filter(
-        (slot) => String(slot.id) !== idToRemove
-      );
-
-      // Also remove from selectedTimeslots if it was selected
-      this.selectedTimeslots = this.selectedTimeslots.filter(
-        (id) => String(id) !== idToRemove
-      );
-    },
-
-    handleTimeslotBooked(data) {
-      // Update the timeslot's booked status
-      const index = this.timeSlots.findIndex((slot) => slot.id === data.id);
-      if (index !== -1) {
-        this.timeSlots[index].booked = true;
-        this.timeSlots[index].bookedBy = data.studentName;
-      }
     },
 
     addTimeslot() {
@@ -211,21 +161,6 @@ export default {
         });
     },
 
-    logout() {
-      fetch("/api/logout", {
-        method: "POST",
-      })
-        .then(() => {
-          this.$store.commit("setLoggedIn", false);
-          this.$store.commit("setUsername", "");
-          this.$store.commit("setAuthenticated", false);
-          this.$router.push("/login");
-        })
-        .catch((error) => {
-          console.error("Logout error:", error);
-          this.msg = "Failed to logout";
-        });
-    },
   },
 };
 </script>
